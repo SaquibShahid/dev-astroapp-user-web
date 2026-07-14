@@ -1,6 +1,6 @@
 import { urlApi } from './urlApi';
 import { postApi } from './callApi';
-import { setUserId, setPassword } from './localStorageKeys';
+import { setUserId, setPassword, getUserId, getPassword } from './localStorageKeys';
 import type { User } from '../store/useAuthStore';
 
 type OtpContext = 'login' | 'signup' | 'forgot_password' | 'verify_mobile';
@@ -14,6 +14,28 @@ interface AutoLoginResponseData extends User {
   password: string;
 }
 
+type AuthResult = { success: true; user: User } | { success: false; message?: string };
+
+// Exchanges a userId/password pair for a JWT (returned via the Authorization
+// response header, captured automatically in callApi.ts).
+const performAutoLogin = async (userId: string, password: string): Promise<AuthResult> => {
+  const res = await postApi<AutoLoginResponseData>(urlApi.auth.autoLogin, {
+    userId,
+    password,
+    deviceId: '',
+    fcmToken: '',
+  });
+
+  if (res.status !== 'success' || !res.data) {
+    return { success: false, message: res.message || 'Session expired' };
+  }
+
+  const { password: rotatedPassword, ...user } = res.data;
+  setPassword(rotatedPassword);
+
+  return { success: true, user: user as User };
+};
+
 export const authService = {
   /**
    * Sends an OTP to the given mobile number. Returns the otpId (in `data`)
@@ -24,12 +46,10 @@ export const authService = {
   },
 
   /**
-   * Verifies the OTP and completes login in two backend calls:
-   * 1. auth/login exchanges the OTP for a one-time userId/password pair.
-   * 2. auth/auto-login exchanges that pair for a JWT (returned via the
-   *    Authorization response header, captured automatically in callApi.ts).
+   * Verifies the OTP and completes login: auth/login exchanges the OTP for a
+   * one-time userId/password pair, then auto-login exchanges that for a JWT.
    */
-  verifyOtpAndLogin: async (mobileNumber: string, otpId: string, otp: string) => {
+  verifyOtpAndLogin: async (mobileNumber: string, otpId: string, otp: string): Promise<AuthResult> => {
     const loginRes = await postApi<LoginResponseData>(urlApi.auth.login, {
       type: 'mobile',
       mobileNumber,
@@ -48,20 +68,20 @@ export const authService = {
     setUserId(userId);
     setPassword(password);
 
-    const autoLoginRes = await postApi<AutoLoginResponseData>(urlApi.auth.autoLogin, {
-      userId,
-      password,
-      deviceId: '',
-      fcmToken: '',
-    });
+    return performAutoLogin(userId, password);
+  },
 
-    if (autoLoginRes.status !== 'success' || !autoLoginRes.data) {
-      return { success: false, message: autoLoginRes.message || 'Verification failed' };
+  /**
+   * Re-authenticates using the userId/password pair stored from the last
+   * login. Called once on app boot so a returning visitor gets a fresh
+   * token instead of trusting whatever's left in localStorage.
+   */
+  autoLogin: async (): Promise<AuthResult> => {
+    const userId = getUserId();
+    const password = getPassword();
+    if (!userId || !password) {
+      return { success: false, message: 'No stored session' };
     }
-
-    const { password: rotatedPassword, ...user } = autoLoginRes.data;
-    setPassword(rotatedPassword);
-
-    return { success: true, user: user as User };
+    return performAutoLogin(userId, password);
   },
 };

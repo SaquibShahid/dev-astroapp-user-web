@@ -72,7 +72,7 @@ const Login: React.FC = () => {
     }
     setLoading(true);
     const res = await authService.verifyOtpAndLogin(mobileNumber, otpId, otp);
-    if (res.success && res.user) {
+    if (res.success) {
       login(res.user);
       const { from } = (location.state as { from?: string } | null) || {};
       navigate(from || '/', { replace: true });

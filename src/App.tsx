@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { Toaster } from 'sonner'
+import { authService } from './api/authService'
+import { getUserId } from './api/localStorageKeys'
 import ProtectedRoute from './Components/Auth/ProtectedRoute'
 import Layout from './Layout/Layout'
 import SplashScreen from './Layout/SplashScreen'
@@ -13,14 +15,36 @@ const SPLASH_MIN_DURATION_MS = 1200;
 const SPLASH_FADE_DURATION_MS = 300;
 
 function App() {
+  const login = useAuthStore((state) => state.login);
+  const logout = useAuthStore((state) => state.logout);
   const setInitialized = useAuthStore((state) => state.setInitialized);
   const isInitialized = useAuthStore((state) => state.isInitialized);
   const [minDurationDone, setMinDurationDone] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    setInitialized(true);
-  }, [setInitialized]);
+    // Guards against StrictMode's dev-only double-invoke — the backend
+    // rotates the stored password on each auto-login call, so firing it
+    // twice would race and the second call could use an already-stale one.
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    const init = async () => {
+      // If a previous session exists, refresh it via auto-login instead of
+      // trusting a possibly-expired token straight from localStorage.
+      if (getUserId()) {
+        const res = await authService.autoLogin();
+        if (res.success) {
+          login(res.user);
+        } else {
+          logout();
+        }
+      }
+      setInitialized(true);
+    };
+    init();
+  }, [login, logout, setInitialized]);
 
   useEffect(() => {
     const timer = setTimeout(() => setMinDurationDone(true), SPLASH_MIN_DURATION_MS);

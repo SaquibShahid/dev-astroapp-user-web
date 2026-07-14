@@ -19,7 +19,7 @@ const handleUnauthorized = () => {
   if (isRedirecting) return;
   isRedirecting = true;
   clearSecureStorage();
-  window.location.href = '/';
+  window.location.href = '/login';
 };
 
 const apiClient = axios.create({
@@ -46,7 +46,7 @@ apiClient.interceptors.request.use(
     }
 
     config.headers.set('Accept', 'application/json');
-    if (token) {
+    if (token && !isPublicRoute) {
       config.headers.set('Authorization', token.startsWith('Bearer ') ? token : `Bearer ${token}`);
     }
 
