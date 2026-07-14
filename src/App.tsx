@@ -9,6 +9,7 @@ import SplashScreen from './Layout/SplashScreen'
 import Home from './View/Home/Home'
 import Login from './View/Login/Login'
 import NotFound from './View/NotFound/NotFound'
+import Profile from './View/Profile/Profile'
 import { useAuthStore } from './store/useAuthStore'
 
 const SPLASH_MIN_DURATION_MS = 1200;
@@ -76,6 +77,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
                     </ProtectedRoute>
                   }
                 />

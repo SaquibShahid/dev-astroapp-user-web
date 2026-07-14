@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 
 interface ProtectedRouteProps {
@@ -7,12 +7,10 @@ interface ProtectedRouteProps {
 }
 
 /**
- * Wraps a route element. Redirects to /login (preserving the original
- * destination in location.state) until the user is logged in.
+ * Wraps a route element. Redirects to /login until the user is logged in.
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isLoggedIn, isInitialized } = useAuthStore();
-  const location = useLocation();
 
   if (!isInitialized) {
     return (
@@ -23,7 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!isLoggedIn) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

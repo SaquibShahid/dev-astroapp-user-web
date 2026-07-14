@@ -1,6 +1,6 @@
 import { IconPhone, IconShieldCheck, IconShieldLock, IconLock } from '@tabler/icons-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { authService } from '../../api/authService';
 import Logo from '../../Components/Logo';
@@ -13,7 +13,6 @@ const RESEND_SECONDS = 30;
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const login = useAuthStore((state) => state.login);
 
   const [step, setStep] = useState<Step>('mobile');
@@ -74,8 +73,7 @@ const Login: React.FC = () => {
     const res = await authService.verifyOtpAndLogin(mobileNumber, otpId, otp);
     if (res.success) {
       login(res.user);
-      const { from } = (location.state as { from?: string } | null) || {};
-      navigate(from || '/', { replace: true });
+      navigate('/', { replace: true });
     } else {
       toast.error(res.message || 'Verification failed');
     }
