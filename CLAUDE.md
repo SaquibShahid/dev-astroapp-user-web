@@ -74,6 +74,10 @@ src/
 - Auth-gated pages wrapped in `<ProtectedRoute>`.
 - Page components live in `View/`, one folder per route.
 
+## Testing workflow
+
+- Don't run/drive the app yourself to verify changes (no dev server, no browser automation). After making a change, tell the user exactly what to click/check to verify it, and wait for them to test and report back.
+
 ## Reference implementation
 
 The canonical, fully-worked example of every pattern above is the `pharmaride-web` project at `/home/saquib/devsaquib/react-learning/pharmaride-web` (same machine). If something here is ambiguous, look at how it's actually done there rather than guessing.

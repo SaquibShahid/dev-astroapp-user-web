@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { TOKEN, setToken, clearSecureStorage } from './localStorageKeys';
+import { TOKEN, setToken, getUserId, clearSecureStorage } from './localStorageKeys';
 import type { ApiResult, RequestPayload } from './types';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').trim();
@@ -48,6 +48,11 @@ apiClient.interceptors.request.use(
     config.headers.set('Accept', 'application/json');
     if (token && !isPublicRoute) {
       config.headers.set('Authorization', token.startsWith('Bearer ') ? token : `Bearer ${token}`);
+    }
+
+    const userId = getUserId();
+    if (userId) {
+      config.headers.set('x-user-id', userId);
     }
 
     return config;

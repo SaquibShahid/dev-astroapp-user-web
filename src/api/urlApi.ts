@@ -16,6 +16,19 @@ export const urlApi = {
     autoLogin: api('auth/auto-login'),
   },
 
+  dashboard: {
+    search: api('dashboard/search'),
+    banners: api('dashboard/data/banners'),
+  },
+
+  wallet: {
+    getBalance: api('wallet'),
+  },
+
+  astrologer: {
+    list: api('astrologer/list'),
+  },
+
   // example:
   // product: {
   //   getProducts: api('product'),

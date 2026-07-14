@@ -1,5 +1,7 @@
 import { create } from 'zustand';
+import { getApi } from '../api/callApi';
 import { getUserData, setUserData, clearSecureStorage, TOKEN } from '../api/localStorageKeys';
+import { urlApi } from '../api/urlApi';
 
 export interface User {
   userId: string;
@@ -18,12 +20,13 @@ interface AuthStore {
   login: (user: User) => void;
   logout: () => void;
   setInitialized: (val: boolean) => void;
+  fetchWallet: () => Promise<void>;
 }
 
 // Initialize from localStorage for immediate availability on boot
 const initialUser = getUserData<User>();
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   isLoggedIn: !!initialUser && !!TOKEN(),
   user: initialUser,
   isInitialized: false,
@@ -39,4 +42,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   setInitialized: (val) => set({ isInitialized: val }),
+
+  fetchWallet: async () => {
+    const res = await getApi<string>(urlApi.wallet.getBalance);
+    const currentUser = get().user;
+    if (res.status === 'success' && res.data !== null && currentUser) {
+      const wallet = Number(res.data);
+      const updatedUser = { ...currentUser, wallet };
+      setUserData(updatedUser);
+      set({ user: updatedUser });
+    }
+  },
 }));

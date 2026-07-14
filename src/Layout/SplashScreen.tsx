@@ -8,7 +8,7 @@ interface SplashScreenProps {
 const SplashScreen: React.FC<SplashScreenProps> = ({ fadingOut }) => {
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-primary transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-primary transition-opacity duration-300 ${
         fadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
