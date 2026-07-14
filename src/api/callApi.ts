@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import { TOKEN, setToken, clearAuthStorage } from './localStorageKeys';
+import { TOKEN, setToken, clearSecureStorage } from './localStorageKeys';
 import type { ApiResult, RequestPayload } from './types';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').trim();
@@ -8,7 +8,9 @@ const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').trim();
 // Routes that don't require an auth token (e.g. login, otp, public content).
 // Add to this list as needed — everything else requires a token.
 const PUBLIC_ROUTES: string[] = [
-  // 'auth/login',
+  'auth/otp-send',
+  'auth/login',
+  'auth/auto-login',
 ];
 
 let isRedirecting = false;
@@ -16,18 +18,23 @@ let isRedirecting = false;
 const handleUnauthorized = () => {
   if (isRedirecting) return;
   isRedirecting = true;
-  clearAuthStorage();
+  clearSecureStorage();
   window.location.href = '/';
 };
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
+  headers: {
+    'x-app-id': import.meta.env.VITE_APP_ID || '',
+    'x-app-platform': 'web',
+    'x-app-version': import.meta.env.VITE_APP_VERSION || '',
+  },
 });
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const relativeUrl = (config.url || '').replace(BASE_URL, '').replace(/^\/+/, '');
+    const relativeUrl = (config.url || '').replace(BASE_URL, '').replace(/^\/+/, '').split('?')[0];
     const isPublicRoute = PUBLIC_ROUTES.some(
       (route) => relativeUrl === route || relativeUrl.startsWith(`${route}/`)
     );
