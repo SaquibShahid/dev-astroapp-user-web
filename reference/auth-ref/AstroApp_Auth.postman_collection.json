@@ -1,0 +1,119 @@
+{
+  "info": {
+    "name": "AstroApp - User Auth APIs",
+    "description": "OTP send, login, and auto-login for the User auth flow. All requests include x-app-id, x-app-platform, x-app-version headers and encryption=false query param.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://devsaquib.edwidtech.com:8930", "type": "string" },
+    { "key": "x-app-id", "value": "4f6d5s4f65ds4f56ds_dev", "type": "string" },
+    { "key": "x-app-platform", "value": "android", "type": "string" },
+    { "key": "x-app-version", "value": "1.0.0", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "password", "value": "", "type": "string" },
+    { "key": "astrologerId", "value": "", "type": "string" },
+    { "key": "astrologerPassword", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "User Auth",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-app-id", "value": "{{x-app-id}}" },
+              { "key": "x-app-platform", "value": "{{x-app-platform}}" },
+              { "key": "x-app-version", "value": "{{x-app-version}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobileNumber\": \"8080808080\",\n  \"context\": \"login\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/otp-send?encryption=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "otp-send"],
+              "query": [{ "key": "encryption", "value": "false" }]
+            },
+            "description": "context must be one of: login, signup, forgot_password, verify_mobile, login_astrologer. Use mobileNumber 8080808080 to get the fixed OTP 123456 for testing without hitting the real OTP provider."
+          }
+        },
+        {
+          "name": "Login (Mobile)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-app-id", "value": "{{x-app-id}}" },
+              { "key": "x-app-platform", "value": "{{x-app-platform}}" },
+              { "key": "x-app-version", "value": "{{x-app-version}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"mobile\",\n  \"mobileNumber\": \"8080808080\",\n  \"otpId\": \"123456789aaa45678bbb3456\",\n  \"otp\": \"123456\",\n  \"deviceId\": \"\",\n  \"guestUserId\": \"\",\n  \"guestPassword\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login?encryption=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"],
+              "query": [{ "key": "encryption", "value": "false" }]
+            },
+            "description": "Returns { userId, password } — no JWT yet. guestUserId/guestPassword are optional and merge an existing guest account into the mobile account on login."
+          }
+        },
+        {
+          "name": "Auto Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    if (json && json.data && json.data.userId) {",
+                  "        pm.collectionVariables.set('userId', json.data.userId);",
+                  "    }",
+                  "    if (json && json.data && json.data.password) {",
+                  "        pm.collectionVariables.set('password', json.data.password);",
+                  "    }",
+                  "    const authHeader = pm.response.headers.get('Authorization');",
+                  "    if (authHeader) {",
+                  "        pm.collectionVariables.set('accessToken', authHeader.replace('Bearer ', ''));",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-app-id", "value": "{{x-app-id}}" },
+              { "key": "x-app-platform", "value": "{{x-app-platform}}" },
+              { "key": "x-app-version", "value": "{{x-app-version}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"\",\n  \"fcmToken\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/auto-login?encryption=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "auto-login"],
+              "query": [{ "key": "encryption", "value": "false" }]
+            },
+            "description": "Exchanges userId+password (from Login) for a JWT, returned in the Authorization response header (Bearer token). Rotates password in non-dev environments."
+          }
+        }
+      ]
+    }
+  ]
+}

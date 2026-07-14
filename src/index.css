@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0000a2;
+  --color-primary-dark: #00008b;
+  --color-accent: #01c9ac;
+  --color-accent-dark: #01b59a;
+  --color-text-main: #1e2939;
+  --color-text-muted: #64748b;
+  --color-text-light: #94a3b8;
+  --color-border: #e5e7eb;
+  --color-bg: #ffffff;
+  --color-bg-soft: #f9fafb;
+  --color-error: #ef4444;
+}
+
+:root {
+  --primary: #0000a2;
+  --primary-dark: #00008b;
+  --accent: #01c9ac;
+  --accent-dark: #01b59a;
+
+  --text-main: #1e2939;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+
+  --border: #e5e7eb;
+  --bg: #ffffff;
+  --bg-soft: #f9fafb;
+  --error: #ef4444;
+
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  color: var(--text-main);
+  background-color: var(--bg);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: var(--bg-soft);
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.container-custom {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 1152px) {
+  .container-custom {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
