@@ -6,10 +6,13 @@ import { getUserId } from './api/localStorageKeys'
 import ProtectedRoute from './Components/Auth/ProtectedRoute'
 import Layout from './Layout/Layout'
 import SplashScreen from './Layout/SplashScreen'
+import Address from './View/Address/Address'
 import Home from './View/Home/Home'
 import Login from './View/Login/Login'
+import MyProfiles from './View/MyProfiles/MyProfiles'
 import NotFound from './View/NotFound/NotFound'
 import Profile from './View/Profile/Profile'
+import Wallet from './View/Wallet/Wallet'
 import { useAuthStore } from './store/useAuthStore'
 
 const SPLASH_MIN_DURATION_MS = 1200;
@@ -85,6 +88,30 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile/my-profiles"
+                  element={
+                    <ProtectedRoute>
+                      <MyProfiles />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/wallet"
+                  element={
+                    <ProtectedRoute>
+                      <Wallet />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile/addresses"
+                  element={
+                    <ProtectedRoute>
+                      <Address />
                     </ProtectedRoute>
                   }
                 />

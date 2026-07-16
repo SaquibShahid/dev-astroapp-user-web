@@ -103,17 +103,13 @@ const Header: React.FC = () => {
         </div>
 
         <div className="ml-auto flex items-center gap-4 flex-shrink-0">
-          <div className="flex items-center gap-2.5 bg-bg-soft rounded-full pl-4 pr-1.5 py-2">
+          <Link to="/wallet" className="flex items-center gap-2.5 bg-bg-soft rounded-full pl-4 pr-1.5 py-2">
             <IconWallet size={18} className="text-primary" />
             <span className="text-text-main font-semibold text-sm">{user?.wallet ?? 0}</span>
-            <button
-              type="button"
-              className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-primary-dark"
-              aria-label="Add money"
-            >
+            <span className="w-6 h-6 rounded-full bg-accent flex items-center justify-center text-primary-dark">
               <IconPlus size={14} stroke={3} />
-            </button>
-          </div>
+            </span>
+          </Link>
 
           <Link to="/profile" className="w-11 h-11 rounded-full overflow-hidden border-2 border-primary/20 flex-shrink-0">
             {user?.profilePicture ? (

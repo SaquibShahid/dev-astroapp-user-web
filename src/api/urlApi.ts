@@ -23,10 +23,33 @@ export const urlApi = {
 
   wallet: {
     getBalance: api('wallet'),
+    addMoney: api('wallet/add-money'),
+    history: api('wallet/history'),
   },
 
   astrologer: {
     list: api('astrologer/list'),
+  },
+
+  user: {
+    updateProfile: api('user'),
+  },
+
+  chatProfile: {
+    list: api('user/chat-profile'),
+    create: api('user/chat-profile'),
+    detail: (id: string) => api(`user/chat-profile/${id}`),
+  },
+
+  address: {
+    list: api('user/address'),
+    create: api('user/address'),
+    detail: (id: string) => api(`user/address/${id}`),
+    setDefault: (id: string) => api(`user/address/default/${id}`),
+  },
+
+  media: {
+    uploadProfilePic: api('upload/profile-pic'),
   },
 
   // example:

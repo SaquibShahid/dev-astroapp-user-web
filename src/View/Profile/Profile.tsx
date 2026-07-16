@@ -11,7 +11,9 @@ import {
   IconUser,
   IconUserCircle,
 } from '@tabler/icons-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import EditProfileModal from './components/EditProfileModal';
 import ProfileMenuSection from './components/ProfileMenuSection';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -50,6 +52,7 @@ const Profile = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -74,13 +77,14 @@ const Profile = () => {
               <p className="font-bold text-text-main truncate">{user?.username || 'You'}</p>
               <p className="text-sm text-text-muted">{user?.mobile}</p>
             </div>
-            <Link
-              to="/profile/edit"
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(true)}
               className="w-9 h-9 rounded-full bg-bg-soft flex items-center justify-center text-primary flex-shrink-0"
               aria-label="Edit profile"
             >
               <IconPencil size={16} />
-            </Link>
+            </button>
           </div>
 
           <button
@@ -103,6 +107,8 @@ const Profile = () => {
           ))}
         </div>
       </div>
+
+      <EditProfileModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
     </div>
   );
 };
