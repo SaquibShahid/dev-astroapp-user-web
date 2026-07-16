@@ -90,9 +90,13 @@ const formatError = <T>(error: unknown): ApiResult<T> => {
   return { data: null, message, status: 'failed' };
 };
 
-export const getApi = async <T = unknown>(url: string, params?: Record<string, unknown>): Promise<ApiResult<T>> => {
+export const getApi = async <T = unknown>(
+  url: string,
+  params?: Record<string, unknown>,
+  headers?: Record<string, string>
+): Promise<ApiResult<T>> => {
   try {
-    return await apiClient.get<never, ApiResult<T>>(url, { params });
+    return await apiClient.get<never, ApiResult<T>>(url, { params, headers });
   } catch (error) {
     return formatError<T>(error);
   }

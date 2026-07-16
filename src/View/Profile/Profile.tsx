@@ -11,48 +11,59 @@ import {
   IconUser,
   IconUserCircle,
 } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EditProfileModal from './components/EditProfileModal';
 import ProfileMenuSection from './components/ProfileMenuSection';
+import type { ProfileMenuItem } from './components/ProfileMenuSection';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
 
-const MENU_SECTIONS = [
-  {
-    title: 'Account',
-    items: [
-      { icon: IconUser, label: 'My Profiles', to: '/profile/my-profiles' },
-      { icon: IconMapPin, label: 'My Addresses', to: '/profile/addresses' },
-      { icon: IconMessage2, label: 'My Communication', to: '/profile/communication' },
-    ],
-  },
-  {
-    title: 'Activity',
-    items: [
-      { icon: IconShoppingBag, label: 'My Orders', to: '/profile/orders' },
-      { icon: IconSparkles, label: 'Remedies Bookings', to: '/profile/remedies-bookings' },
-    ],
-  },
-  {
-    title: 'Support & Legal',
-    items: [
-      { icon: IconHelpCircle, label: 'Help & Support', to: '/help' },
-      { icon: IconInfoCircle, label: 'About', to: '/about' },
-      { icon: IconInfoCircle, label: 'Privacy Policy', to: '/privacy' },
-      { icon: IconInfoCircle, label: 'Return Policy', to: '/return-policy' },
-    ],
-  },
-  {
-    title: 'Preferences',
-    items: [{ icon: IconLanguage, label: 'Change Language', to: '/profile/language' }],
-  },
+const ACCOUNT_ITEMS: ProfileMenuItem[] = [
+  { icon: IconUser, label: 'My Profiles', to: '/profile/my-profiles' },
+  { icon: IconMapPin, label: 'My Addresses', to: '/profile/addresses' },
+  { icon: IconMessage2, label: 'My Communication', to: '/profile/communication' },
 ];
+
+const ACTIVITY_ITEMS: ProfileMenuItem[] = [
+  { icon: IconShoppingBag, label: 'My Orders', to: '/profile/orders' },
+  { icon: IconSparkles, label: 'Remedies Bookings', to: '/profile/remedies-bookings' },
+];
+
+const PREFERENCE_ITEMS: ProfileMenuItem[] = [{ icon: IconLanguage, label: 'Change Language', to: '/profile/language' }];
 
 const Profile = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const config = useSettingsStore((state) => state.config);
+  const fetchConfig = useSettingsStore((state) => state.fetchConfig);
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
+
+  // Privacy/Return open the externally-hosted policy pages (from settings
+  // config) directly — they're not rendered in-app, so skip them until the
+  // config has loaded rather than linking to a dead URL.
+  const supportItems: ProfileMenuItem[] = [
+    { icon: IconHelpCircle, label: 'Help & Support', to: '/help' },
+    { icon: IconInfoCircle, label: 'About', to: '/about' },
+    ...(config?.privacyPolicyUrl
+      ? [{ icon: IconInfoCircle, label: 'Privacy Policy', href: config.privacyPolicyUrl }]
+      : []),
+    ...(config?.refundPolicyUrl
+      ? [{ icon: IconInfoCircle, label: 'Return Policy', href: config.refundPolicyUrl }]
+      : []),
+  ];
+
+  const menuSections = [
+    { title: 'Account', items: ACCOUNT_ITEMS },
+    { title: 'Activity', items: ACTIVITY_ITEMS },
+    { title: 'Support & Legal', items: supportItems },
+    { title: 'Preferences', items: PREFERENCE_ITEMS },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -102,7 +113,7 @@ const Profile = () => {
         </div>
 
         <div className="space-y-8">
-          {MENU_SECTIONS.map((section) => (
+          {menuSections.map((section) => (
             <ProfileMenuSection key={section.title} title={section.title} items={section.items} />
           ))}
         </div>

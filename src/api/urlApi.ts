@@ -52,6 +52,10 @@ export const urlApi = {
     uploadProfilePic: api('upload/profile-pic'),
   },
 
+  settings: {
+    get: api('data/setting'),
+  },
+
   // example:
   // product: {
   //   getProducts: api('product'),

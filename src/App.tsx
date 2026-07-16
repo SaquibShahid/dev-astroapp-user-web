@@ -6,7 +6,9 @@ import { getUserId } from './api/localStorageKeys'
 import ProtectedRoute from './Components/Auth/ProtectedRoute'
 import Layout from './Layout/Layout'
 import SplashScreen from './Layout/SplashScreen'
+import About from './View/About/About'
 import Address from './View/Address/Address'
+import Help from './View/Help/Help'
 import Home from './View/Home/Home'
 import Login from './View/Login/Login'
 import MyProfiles from './View/MyProfiles/MyProfiles'
@@ -112,6 +114,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Address />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/help"
+                  element={
+                    <ProtectedRoute>
+                      <Help />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/about"
+                  element={
+                    <ProtectedRoute>
+                      <About />
                     </ProtectedRoute>
                   }
                 />
