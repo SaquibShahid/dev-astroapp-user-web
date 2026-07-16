@@ -1,4 +1,4 @@
-# demo2
+# Astroapp Template
 
 Frontend built with Vite + React + TypeScript, following the team's standard architecture (originally established in `pharmaride-web`).
 
