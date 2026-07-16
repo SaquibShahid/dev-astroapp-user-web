@@ -1,9 +1,8 @@
 import { IconChevronRight } from '@tabler/icons-react';
 import React, { useState } from 'react';
-import type { FaqItem } from '../../../store/useSettingsStore';
 
 interface FaqAccordionItemProps {
-  faq: FaqItem;
+  faq: { question: string; answer: string };
 }
 
 const FaqAccordionItem: React.FC<FaqAccordionItemProps> = ({ faq }) => {

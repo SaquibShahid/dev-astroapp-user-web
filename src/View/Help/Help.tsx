@@ -1,8 +1,8 @@
 import { IconArrowLeft, IconBrandWhatsapp, IconLoader2, IconMail, IconPhone } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import FaqAccordionItem from '../../Components/Common/FaqAccordionItem';
 import { useSettingsStore } from '../../store/useSettingsStore';
-import FaqAccordionItem from './components/FaqAccordionItem';
 
 const Help: React.FC = () => {
   const navigate = useNavigate();

@@ -14,6 +14,10 @@ import Login from './View/Login/Login'
 import MyProfiles from './View/MyProfiles/MyProfiles'
 import NotFound from './View/NotFound/NotFound'
 import Profile from './View/Profile/Profile'
+import RemedyBookings from './View/RemedyBookings/RemedyBookings'
+import RemedyCategories from './View/Remedies/RemedyCategories'
+import RemedyDetail from './View/Remedies/RemedyDetail'
+import RemedyList from './View/Remedies/RemedyList'
 import Wallet from './View/Wallet/Wallet'
 import { useAuthStore } from './store/useAuthStore'
 
@@ -130,6 +134,38 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <About />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/remedies"
+                  element={
+                    <ProtectedRoute>
+                      <RemedyCategories />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/remedies/:categoryId"
+                  element={
+                    <ProtectedRoute>
+                      <RemedyList />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/remedies/:categoryId/:remedyId"
+                  element={
+                    <ProtectedRoute>
+                      <RemedyDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile/remedies-bookings"
+                  element={
+                    <ProtectedRoute>
+                      <RemedyBookings />
                     </ProtectedRoute>
                   }
                 />

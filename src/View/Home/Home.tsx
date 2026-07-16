@@ -1,19 +1,22 @@
 import { IconBuilding, IconCalendarEvent, IconChevronRight, IconFileText, IconSparkles } from '@tabler/icons-react';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AstrologerCard from './components/AstrologerCard';
 import PromoBanner from './components/PromoBanner';
 import QuickActionCard from './components/QuickActionCard';
 import { useHomeStore } from '../../store/useHomeStore';
 
-// Quick actions stay static for now — their APIs are intentionally out of scope for this pass.
+// Quick actions stay static for now — the rest still have no APIs wired up,
+// so only Remedies (which does) gets a `to`.
 const QUICK_ACTIONS = [
   { icon: IconCalendarEvent, label: 'Daily Horoscope' },
   { icon: IconFileText, label: 'Your Kundli' },
-  { icon: IconSparkles, label: 'Remedies' },
+  { icon: IconSparkles, label: 'Remedies', to: '/remedies' },
   { icon: IconBuilding, label: 'Vastu Booking' },
 ];
 
 const Home = () => {
+  const navigate = useNavigate();
   const { banners, isLoadingBanners, astrologers, isLoadingAstrologers, fetchBanners, fetchAstrologers } =
     useHomeStore();
 
@@ -34,7 +37,12 @@ const Home = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 md:gap-6">
         {QUICK_ACTIONS.map((action) => (
-          <QuickActionCard key={action.label} icon={action.icon} label={action.label} />
+          <QuickActionCard
+            key={action.label}
+            icon={action.icon}
+            label={action.label}
+            onClick={action.to ? () => navigate(action.to) : undefined}
+          />
         ))}
       </div>
 

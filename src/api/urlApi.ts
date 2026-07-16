@@ -56,6 +56,13 @@ export const urlApi = {
     get: api('data/setting'),
   },
 
+  remedies: {
+    categories: api('remedies/categories'),
+    listByCategory: (categoryId: string) => api(`remedies/list/${categoryId}`),
+    book: api('remedies/book'),
+    myBookings: api('remedies/my-bookings'),
+  },
+
   // example:
   // product: {
   //   getProducts: api('product'),
