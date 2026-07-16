@@ -3,7 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import FaqAccordionItem from '../../Components/Common/FaqAccordionItem';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useRemedyStore } from '../../store/useRemedyStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
+import { openRazorpayCheckout } from '../../Utils/razorpay';
 
 const RemedyDetail: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +15,9 @@ const RemedyDetail: React.FC = () => {
   const isLoading = useRemedyStore((state) => state.isLoadingRemedies);
   const fetchRemediesByCategory = useRemedyStore((state) => state.fetchRemediesByCategory);
   const bookRemedy = useRemedyStore((state) => state.bookRemedy);
+  const user = useAuthStore((state) => state.user);
+  const config = useSettingsStore((state) => state.config);
+  const fetchConfig = useSettingsStore((state) => state.fetchConfig);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isBooking, setIsBooking] = useState(false);
@@ -19,6 +25,10 @@ const RemedyDetail: React.FC = () => {
   useEffect(() => {
     if (categoryId) fetchRemediesByCategory(categoryId);
   }, [categoryId, fetchRemediesByCategory]);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
 
   useEffect(() => {
     setSelectedImageIndex(0);
@@ -31,14 +41,63 @@ const RemedyDetail: React.FC = () => {
   const handleBookNow = async () => {
     setIsBooking(true);
     const res = await bookRemedy(remedyId);
-    if (res.success && res.redirectUrl) {
+
+    if (!res.success) {
+      setIsBooking(false);
+      toast.error(res.message || 'Failed to book remedy');
+      return;
+    }
+
+    if (res.paymentChannel?.toUpperCase() === 'RAZORPAY') {
+      const razorpayKey = config?.razorpayKey;
+      if (!res.orderId || !razorpayKey) {
+        setIsBooking(false);
+        toast.error('Payment is not configured');
+        return;
+      }
+
+      try {
+        await openRazorpayCheckout({
+          key: razorpayKey,
+          order_id: res.orderId,
+          name: config?.appName || 'AstroApp',
+          description: remedy?.title,
+          prefill: { name: user?.username, contact: user?.mobile },
+          // Hex mirrors the --color-primary token — Razorpay's checkout
+          // renders in its own iframe, so our CSS variables aren't visible to it.
+          theme: { color: '#4b2e83' },
+          handler: () => {
+            setIsBooking(false);
+            toast.success('Payment successful! Your booking will be confirmed shortly.');
+            navigate('/profile/remedies-bookings');
+          },
+          modal: {
+            ondismiss: () => {
+              setIsBooking(false);
+              toast('Payment cancelled');
+            },
+          },
+          onFailure: (failure) => {
+            setIsBooking(false);
+            toast.error(failure.error.description || 'Payment failed');
+          },
+        });
+      } catch (error) {
+        setIsBooking(false);
+        toast.error(error instanceof Error ? error.message : 'Failed to start payment');
+      }
+      return;
+    }
+
+    if (res.redirectUrl) {
       // Full-page redirect: payment completes on the gateway's own page,
       // outside the SPA, and the booking is confirmed async via webhook/cron.
       window.location.href = res.redirectUrl;
       return;
     }
+
     setIsBooking(false);
-    toast.error(res.message || 'Failed to book remedy');
+    toast.error('Unsupported payment channel');
   };
 
   return (

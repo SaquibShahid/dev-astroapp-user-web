@@ -45,9 +45,19 @@ export interface RemedyBooking {
   review?: string;
 }
 
+interface BookRemedyData {
+  bookingId: string;
+  paymentId: string;
+  paymentChannel: string;
+  orderId?: string;
+  redirectUrl?: string;
+}
+
 interface BookRemedyResult {
   success: boolean;
   message?: string;
+  paymentChannel?: string;
+  orderId?: string;
   redirectUrl?: string;
 }
 
@@ -91,12 +101,20 @@ export const useRemedyStore = create<RemedyStore>((set, get) => ({
     }));
   },
 
+  // Payment channel varies (PhonePe/Cashfree hand back a redirectUrl to
+  // full-page-redirect to; Razorpay hands back an orderId for the Checkout
+  // SDK instead) — the caller branches on `paymentChannel`.
   bookRemedy: async (remedyId) => {
-    const res = await postApi<{ redirectUrl: string }>(urlApi.remedies.book, { remedyId });
+    const res = await postApi<BookRemedyData>(urlApi.remedies.book, { remedyId });
     if (res.status !== 'success' || !res.data) {
       return { success: false, message: res.message };
     }
-    return { success: true, redirectUrl: res.data.redirectUrl };
+    return {
+      success: true,
+      paymentChannel: res.data.paymentChannel,
+      orderId: res.data.orderId,
+      redirectUrl: res.data.redirectUrl,
+    };
   },
 
   fetchMyBookings: async () => {

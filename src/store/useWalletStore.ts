@@ -32,13 +32,15 @@ interface TransactionHistoryData {
 interface AddMoneyData {
   paymentId: string;
   paymentChannel: string;
-  orderId: string;
-  redirectUrl: string;
+  orderId?: string;
+  redirectUrl?: string;
 }
 
 interface AddMoneyResult {
   success: boolean;
   message?: string;
+  paymentChannel?: string;
+  orderId?: string;
   redirectUrl?: string;
 }
 
@@ -60,11 +62,19 @@ export const useWalletStore = create<WalletStore>((set) => ({
     set({ transactions: res.data?.transactions || [], isLoadingTransactions: false });
   },
 
+  // Payment channel varies (PhonePe/Cashfree hand back a redirectUrl to
+  // full-page-redirect to; Razorpay hands back an orderId for the Checkout
+  // SDK instead) — the caller branches on `paymentChannel`.
   addMoney: async (amount) => {
     const res = await postApi<AddMoneyData>(urlApi.wallet.addMoney, { amount });
     if (res.status !== 'success' || !res.data) {
       return { success: false, message: res.message };
     }
-    return { success: true, redirectUrl: res.data.redirectUrl };
+    return {
+      success: true,
+      paymentChannel: res.data.paymentChannel,
+      orderId: res.data.orderId,
+      redirectUrl: res.data.redirectUrl,
+    };
   },
 }));

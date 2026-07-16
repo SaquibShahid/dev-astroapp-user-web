@@ -27,6 +27,7 @@ export interface AppConfig {
   support: SupportConfig;
   faq: FaqItem[];
   socialMediaLinks: SocialMediaLinks;
+  razorpayKey: string;
 }
 
 interface SettingsStore {

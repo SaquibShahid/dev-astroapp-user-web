@@ -2,7 +2,10 @@ import { IconLoader2, IconWallet } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Modal from '../../../Components/Common/Modal';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { useSettingsStore } from '../../../store/useSettingsStore';
 import { useWalletStore } from '../../../store/useWalletStore';
+import { openRazorpayCheckout } from '../../../Utils/razorpay';
 
 interface AddMoneyModalProps {
   isOpen: boolean;
@@ -13,6 +16,10 @@ const QUICK_AMOUNTS = [100, 500, 1000, 5000];
 
 const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
   const addMoney = useWalletStore((state) => state.addMoney);
+  const user = useAuthStore((state) => state.user);
+  const fetchWallet = useAuthStore((state) => state.fetchWallet);
+  const config = useSettingsStore((state) => state.config);
+  const fetchConfig = useSettingsStore((state) => state.fetchConfig);
 
   const [amount, setAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -22,6 +29,10 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
     setAmount('');
     setIsProcessing(false);
   }, [isOpen]);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
 
   const handleAmountChange = (value: string) => {
     setAmount(value.replace(/[^0-9]/g, ''));
@@ -38,7 +49,55 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
     setIsProcessing(true);
     const res = await addMoney(numericAmount);
 
-    if (res.success && res.redirectUrl) {
+    if (!res.success) {
+      setIsProcessing(false);
+      toast.error(res.message || 'Failed to create payment order');
+      return;
+    }
+
+    if (res.paymentChannel?.toUpperCase() === 'RAZORPAY') {
+      const razorpayKey = config?.razorpayKey;
+      if (!res.orderId || !razorpayKey) {
+        setIsProcessing(false);
+        toast.error('Payment is not configured');
+        return;
+      }
+
+      try {
+        await openRazorpayCheckout({
+          key: razorpayKey,
+          order_id: res.orderId,
+          name: config?.appName || 'AstroApp',
+          description: 'Add money to wallet',
+          prefill: { name: user?.username, contact: user?.mobile },
+          // Hex mirrors the --color-primary token — Razorpay's checkout
+          // renders in its own iframe, so our CSS variables aren't visible to it.
+          theme: { color: '#4b2e83' },
+          handler: () => {
+            setIsProcessing(false);
+            toast.success('Payment successful! Your wallet will be credited shortly.');
+            fetchWallet();
+            onClose();
+          },
+          modal: {
+            ondismiss: () => {
+              setIsProcessing(false);
+              toast('Payment cancelled');
+            },
+          },
+          onFailure: (failure) => {
+            setIsProcessing(false);
+            toast.error(failure.error.description || 'Payment failed');
+          },
+        });
+      } catch (error) {
+        setIsProcessing(false);
+        toast.error(error instanceof Error ? error.message : 'Failed to start payment');
+      }
+      return;
+    }
+
+    if (res.redirectUrl) {
       // Full-page redirect: payment completes on the gateway's own page,
       // outside the SPA, and the wallet is credited async via webhook/cron.
       window.location.href = res.redirectUrl;
@@ -46,7 +105,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
     }
 
     setIsProcessing(false);
-    toast.error(res.message || 'Failed to create payment order');
+    toast.error('Unsupported payment channel');
   };
 
   return (
@@ -99,7 +158,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({ isOpen, onClose }) => {
           className="w-full flex items-center justify-center gap-2 bg-primary text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-primary-dark transition-colors disabled:opacity-70"
         >
           {isProcessing && <IconLoader2 size={18} className="animate-spin" />}
-          {isProcessing ? 'Redirecting...' : 'Proceed'}
+          {isProcessing ? 'Processing...' : 'Proceed'}
         </button>
       </form>
     </Modal>
