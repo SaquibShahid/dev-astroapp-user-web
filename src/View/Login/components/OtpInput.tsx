@@ -5,9 +5,10 @@ interface OtpInputProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  onEnter?: () => void;
 }
 
-const OtpInput: React.FC<OtpInputProps> = ({ length, value, onChange, disabled }) => {
+const OtpInput: React.FC<OtpInputProps> = ({ length, value, onChange, disabled, onEnter }) => {
   const [digits, setDigits] = useState<string[]>(() => Array.from({ length }, (_, i) => value[i] || ''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -39,6 +40,8 @@ const OtpInput: React.FC<OtpInputProps> = ({ length, value, onChange, disabled }
       next[index - 1] = '';
       updateDigits(next);
       inputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'Enter') {
+      onEnter?.();
     }
   };
 

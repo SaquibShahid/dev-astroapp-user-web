@@ -10,6 +10,7 @@ import About from './View/About/About'
 import Address from './View/Address/Address'
 import Help from './View/Help/Help'
 import Home from './View/Home/Home'
+import Kundli from './View/Kundli/Kundli'
 import Login from './View/Login/Login'
 import MyProfiles from './View/MyProfiles/MyProfiles'
 import NotFound from './View/NotFound/NotFound'
@@ -134,6 +135,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <About />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/kundli/:chatProfileId"
+                  element={
+                    <ProtectedRoute>
+                      <Kundli />
                     </ProtectedRoute>
                   }
                 />

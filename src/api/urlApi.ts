@@ -63,6 +63,14 @@ export const urlApi = {
     myBookings: api('remedies/my-bookings'),
   },
 
+  vastu: {
+    book: api('vastu/book'),
+  },
+
+  astrology: {
+    getData: api('astrology/get-data'),
+  },
+
   // example:
   // product: {
   //   getProducts: api('product'),

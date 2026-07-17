@@ -1,29 +1,39 @@
 import { IconBuilding, IconCalendarEvent, IconChevronRight, IconFileText, IconSparkles } from '@tabler/icons-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AstrologerCard from './components/AstrologerCard';
 import PromoBanner from './components/PromoBanner';
 import QuickActionCard from './components/QuickActionCard';
+import SelectKundliProfileModal from './components/SelectKundliProfileModal';
+import VastuBookingModal from './components/VastuBookingModal';
 import { useHomeStore } from '../../store/useHomeStore';
 
 // Quick actions stay static for now — the rest still have no APIs wired up,
-// so only Remedies (which does) gets a `to`.
+// so only Remedies (which does) gets a `to`; Kundli and Vastu Booking open modals.
 const QUICK_ACTIONS = [
   { icon: IconCalendarEvent, label: 'Daily Horoscope' },
-  { icon: IconFileText, label: 'Your Kundli' },
+  { icon: IconFileText, label: 'Your Kundli', action: 'kundli' as const },
   { icon: IconSparkles, label: 'Remedies', to: '/remedies' },
-  { icon: IconBuilding, label: 'Vastu Booking' },
+  { icon: IconBuilding, label: 'Vastu Booking', action: 'vastu' as const },
 ];
 
 const Home = () => {
   const navigate = useNavigate();
   const { banners, isLoadingBanners, astrologers, isLoadingAstrologers, fetchBanners, fetchAstrologers } =
     useHomeStore();
+  const [isVastuModalOpen, setIsVastuModalOpen] = useState(false);
+  const [isKundliModalOpen, setIsKundliModalOpen] = useState(false);
 
   useEffect(() => {
     fetchBanners();
     fetchAstrologers();
   }, [fetchBanners, fetchAstrologers]);
+
+  const handleQuickAction = (action: (typeof QUICK_ACTIONS)[number]) => {
+    if (action.to) navigate(action.to);
+    else if (action.action === 'vastu') setIsVastuModalOpen(true);
+    else if (action.action === 'kundli') setIsKundliModalOpen(true);
+  };
 
   return (
     <div className="container-custom py-8 md:py-10 space-y-10 md:space-y-14">
@@ -41,7 +51,7 @@ const Home = () => {
             key={action.label}
             icon={action.icon}
             label={action.label}
-            onClick={action.to ? () => navigate(action.to) : undefined}
+            onClick={() => handleQuickAction(action)}
           />
         ))}
       </div>
@@ -74,6 +84,9 @@ const Home = () => {
           <p className="text-sm text-text-muted">No astrologers available right now.</p>
         )}
       </div>
+
+      <VastuBookingModal isOpen={isVastuModalOpen} onClose={() => setIsVastuModalOpen(false)} />
+      <SelectKundliProfileModal isOpen={isKundliModalOpen} onClose={() => setIsKundliModalOpen(false)} />
     </div>
   );
 };

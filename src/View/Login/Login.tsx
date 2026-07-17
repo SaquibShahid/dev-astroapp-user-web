@@ -155,7 +155,7 @@ const Login: React.FC = () => {
 
             <div className="space-y-3">
               <label className="block text-sm font-semibold text-text-main">Enter OTP</label>
-              <OtpInput length={6} value={otp} onChange={setOtp} disabled={loading} />
+              <OtpInput length={6} value={otp} onChange={setOtp} disabled={loading} onEnter={handleVerifyOtp} />
               <div className="flex justify-center">
                 {canResend ? (
                   <button
