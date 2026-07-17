@@ -12,6 +12,9 @@ export interface Astrologer {
   chatPricePerMinute: number;
   callPricePerMinute: number;
   videoPricePerMinute: number;
+  skills?: string[];
+  languages?: string[];
+  isOnline?: boolean;
 }
 
 interface AstrologerCardProps {

@@ -14,12 +14,12 @@ const RemedyCard: React.FC<RemedyCardProps> = ({ remedy, categoryId }) => {
   return (
     <Link
       to={`/remedies/${categoryId}/${remedy._id}`}
-      className="bg-bg rounded-2xl border border-border p-5 flex flex-col sm:flex-row gap-4 hover:border-primary/30 transition-colors"
+      className="bg-bg rounded-2xl border border-border p-5 flex flex-row items-start gap-4 hover:border-primary/30 transition-colors"
     >
       <img
         src={remedy.images[0]}
         alt={remedy.title}
-        className="w-full sm:w-28 h-40 sm:h-28 rounded-xl object-cover flex-shrink-0"
+        className="w-24 sm:w-28 aspect-square rounded-xl object-cover flex-shrink-0"
       />
 
       <div className="min-w-0 flex-1 flex flex-col">

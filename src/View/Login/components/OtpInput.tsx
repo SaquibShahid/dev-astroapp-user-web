@@ -19,6 +19,11 @@ const OtpInput: React.FC<OtpInputProps> = ({ length, value, onChange, disabled, 
     }
   }, [value, length]);
 
+  // Autofocus the first box when this step mounts, so typing works immediately.
+  useEffect(() => {
+    inputRefs.current[0]?.focus();
+  }, []);
+
   const updateDigits = (next: string[]) => {
     setDigits(next);
     onChange(next.join(''));

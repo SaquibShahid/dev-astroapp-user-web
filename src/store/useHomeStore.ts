@@ -16,6 +16,9 @@ interface RawAstrologer {
   username: string;
   profilePicture?: string;
   rating: number;
+  skills?: string[];
+  languages?: string[];
+  currentStatus?: string;
   pricing: {
     chatPerMinute: number;
     voicePerMinute: number;
@@ -44,6 +47,9 @@ const mapAstrologer = (raw: RawAstrologer): Astrologer => ({
   chatPricePerMinute: raw.pricing.chatPerMinute,
   callPricePerMinute: raw.pricing.voicePerMinute,
   videoPricePerMinute: raw.pricing.videoPerMinute,
+  skills: raw.skills,
+  languages: raw.languages,
+  isOnline: raw.currentStatus === 'ONLINE',
 });
 
 interface HomeStore {
@@ -53,10 +59,14 @@ interface HomeStore {
   isLoadingAstrologers: boolean;
   searchHints: string[];
   isSearching: boolean;
+  searchResults: Astrologer[];
+  isLoadingSearchResults: boolean;
   fetchBanners: () => Promise<void>;
   fetchAstrologers: () => Promise<void>;
   fetchSearchHints: (query: string) => Promise<void>;
   clearSearchHints: () => void;
+  searchAstrologers: (query: string) => Promise<void>;
+  clearSearchResults: () => void;
 }
 
 export const useHomeStore = create<HomeStore>((set) => ({
@@ -66,6 +76,8 @@ export const useHomeStore = create<HomeStore>((set) => ({
   isLoadingAstrologers: false,
   searchHints: [],
   isSearching: false,
+  searchResults: [],
+  isLoadingSearchResults: false,
 
   fetchBanners: async () => {
     set({ isLoadingBanners: true });
@@ -102,4 +114,19 @@ export const useHomeStore = create<HomeStore>((set) => ({
   },
 
   clearSearchHints: () => set({ searchHints: [] }),
+
+  searchAstrologers: async (query: string) => {
+    if (query.trim().length < 3) {
+      set({ searchResults: [] });
+      return;
+    }
+    set({ isLoadingSearchResults: true });
+    const res = await getApi<RawAstrologer[]>(urlApi.astrologer.list, { search: query, page: 1, limit: 20 });
+    set({
+      searchResults: res.status === 'success' && res.data ? res.data.map(mapAstrologer) : [],
+      isLoadingSearchResults: false,
+    });
+  },
+
+  clearSearchResults: () => set({ searchResults: [] }),
 }));

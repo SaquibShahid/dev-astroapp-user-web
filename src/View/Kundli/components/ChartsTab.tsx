@@ -53,6 +53,15 @@ const CHART_NAMES: Record<string, string> = {
   SUN: 'Sun Chart',
 };
 
+// The provider's SVG ships fixed width/height but no viewBox, so CSS sizing
+// alone just clips it instead of scaling — add a viewBox so it scales cleanly.
+const withViewBox = (svg: string): string => {
+  if (/viewBox=/i.test(svg)) return svg;
+  const width = svg.match(/width="(\d+(?:\.\d+)?)"/)?.[1] || '350';
+  const height = svg.match(/height="(\d+(?:\.\d+)?)"/)?.[1] || '350';
+  return svg.replace('<svg ', `<svg viewBox="0 0 ${width} ${height}" `);
+};
+
 const ChartsTab: React.FC<ChartsTabProps> = ({ chatProfileId }) => {
   const [chartId, setChartId] = useState('D1');
   const key = `${chatProfileId}:${chartId}`;
@@ -91,7 +100,10 @@ const ChartsTab: React.FC<ChartsTabProps> = ({ chatProfileId }) => {
         {isLoadingChart || !chartSvg ? (
           <IconLoader2 size={24} className="animate-spin text-primary" />
         ) : (
-          <div className="w-full max-w-[350px]" dangerouslySetInnerHTML={{ __html: chartSvg }} />
+          <div
+            className="w-full max-w-[350px] [&>svg]:w-full [&>svg]:h-auto"
+            dangerouslySetInnerHTML={{ __html: withViewBox(chartSvg) }}
+          />
         )}
       </div>
 

@@ -12,7 +12,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import Logo from '../Components/Logo';
 import { useAuthStore } from '../store/useAuthStore';
 import { useHomeStore } from '../store/useHomeStore';
@@ -28,6 +28,7 @@ const NAV_ITEMS = [
 const SEARCH_DEBOUNCE_MS = 350;
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const fetchWallet = useAuthStore((state) => state.fetchWallet);
   const { searchHints, fetchSearchHints, clearSearchHints } = useHomeStore();
@@ -60,6 +61,23 @@ const Header: React.FC = () => {
 
   const showDropdown = isSearchFocused && searchQuery.trim().length >= 3 && searchHints.length > 0;
 
+  const searchDropdown = showDropdown && (
+    <ul className="absolute top-full left-0 right-0 mt-2 bg-bg border border-border rounded-2xl shadow-lg py-2 max-h-72 overflow-y-auto z-40">
+      {searchHints.map((hint, index) => (
+        <li key={`${hint}-${index}`}>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => handleHintClick(hint)}
+            className="w-full text-left px-4 py-2 text-sm text-text-main hover:bg-bg-soft transition-colors"
+          >
+            {hint}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <header className="sticky top-0 z-30 bg-bg border-b border-border">
       <div className="container-custom flex items-center gap-5 py-7 md:py-9 mb-1 md:mb-2">
@@ -72,7 +90,16 @@ const Header: React.FC = () => {
           </span>
         </Link>
 
-        <div className="relative flex-1 max-w-md min-w-0 my-2 md:my-3">
+        <button
+          type="button"
+          onClick={() => navigate('/search')}
+          className="md:hidden text-text-main flex-shrink-0"
+          aria-label="Search"
+        >
+          <IconSearch size={22} />
+        </button>
+
+        <div className="relative flex-1 max-w-md min-w-0 my-2 md:my-3 hidden md:block">
           <IconSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-light" />
           <input
             type="text"
@@ -84,22 +111,7 @@ const Header: React.FC = () => {
             className="w-full h-12 pl-11 pr-4 bg-bg-soft border border-border rounded-full focus:outline-none focus:border-primary focus:shadow-sm transition-all text-sm"
           />
 
-          {showDropdown && (
-            <ul className="absolute top-full left-0 right-0 mt-2 bg-bg border border-border rounded-2xl shadow-lg py-2 max-h-72 overflow-y-auto z-40">
-              {searchHints.map((hint, index) => (
-                <li key={`${hint}-${index}`}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => handleHintClick(hint)}
-                    className="w-full text-left px-4 py-2 text-sm text-text-main hover:bg-bg-soft transition-colors"
-                  >
-                    {hint}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          {searchDropdown}
         </div>
 
         <div className="ml-auto flex items-center gap-4 flex-shrink-0">

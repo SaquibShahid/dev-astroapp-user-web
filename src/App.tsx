@@ -19,6 +19,7 @@ import RemedyBookings from './View/RemedyBookings/RemedyBookings'
 import RemedyCategories from './View/Remedies/RemedyCategories'
 import RemedyDetail from './View/Remedies/RemedyDetail'
 import RemedyList from './View/Remedies/RemedyList'
+import Search from './View/Search/Search'
 import Wallet from './View/Wallet/Wallet'
 import { useAuthStore } from './store/useAuthStore'
 
@@ -135,6 +136,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <About />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/search"
+                  element={
+                    <ProtectedRoute>
+                      <Search />
                     </ProtectedRoute>
                   }
                 />
