@@ -15,7 +15,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import Logo from '../Components/Logo';
 import { useAuthStore } from '../store/useAuthStore';
-import { useHomeStore } from '../store/useHomeStore';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home', icon: IconHome, end: true },
@@ -31,10 +30,8 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const fetchWallet = useAuthStore((state) => state.fetchWallet);
-  const { searchHints, fetchSearchHints, clearSearchHints } = useHomeStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -45,38 +42,18 @@ const Header: React.FC = () => {
     setSearchQuery(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (value.trim().length < 3) {
-      clearSearchHints();
-      return;
-    }
+    if (value.trim().length < 3) return;
     debounceRef.current = setTimeout(() => {
-      fetchSearchHints(value);
+      navigate(`/search?q=${encodeURIComponent(value.trim())}`, { replace: true });
     }, SEARCH_DEBOUNCE_MS);
   };
 
-  const handleHintClick = (hint: string) => {
-    setSearchQuery(hint);
-    clearSearchHints();
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
-
-  const showDropdown = isSearchFocused && searchQuery.trim().length >= 3 && searchHints.length > 0;
-
-  const searchDropdown = showDropdown && (
-    <ul className="absolute top-full left-0 right-0 mt-2 bg-bg border border-border rounded-2xl shadow-lg py-2 max-h-72 overflow-y-auto z-40">
-      {searchHints.map((hint, index) => (
-        <li key={`${hint}-${index}`}>
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => handleHintClick(hint)}
-            className="w-full text-left px-4 py-2 text-sm text-text-main hover:bg-bg-soft transition-colors"
-          >
-            {hint}
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
 
   return (
     <header className="sticky top-0 z-30 bg-bg border-b border-border">
@@ -105,13 +82,10 @@ const Header: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setIsSearchFocused(false)}
+            onKeyDown={handleSearchKeyDown}
             placeholder="Search for astrologers, services..."
             className="w-full h-12 pl-11 pr-4 bg-bg-soft border border-border rounded-full focus:outline-none focus:border-primary focus:shadow-sm transition-all text-sm"
           />
-
-          {searchDropdown}
         </div>
 
         <div className="ml-auto flex items-center gap-4 flex-shrink-0">

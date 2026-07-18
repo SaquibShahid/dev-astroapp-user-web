@@ -1,6 +1,6 @@
 import { IconArrowLeft, IconLoader2, IconSearch } from '@tabler/icons-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useHomeStore } from '../../store/useHomeStore';
 import SearchResultRow from './components/SearchResultRow';
 
@@ -8,19 +8,24 @@ const SEARCH_DEBOUNCE_MS = 350;
 
 const Search: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get('q') ?? '';
   const searchResults = useHomeStore((s) => s.searchResults);
   const isLoadingSearchResults = useHomeStore((s) => s.isLoadingSearchResults);
   const searchAstrologers = useHomeStore((s) => s.searchAstrologers);
   const clearSearchResults = useHomeStore((s) => s.clearSearchResults);
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
+    if (initialQuery.trim().length >= 3) {
+      searchAstrologers(initialQuery);
+    }
     return () => clearSearchResults();
-  }, [clearSearchResults]);
+  }, [initialQuery, searchAstrologers, clearSearchResults]);
 
   const handleChange = (value: string) => {
     setQuery(value);
@@ -37,7 +42,7 @@ const Search: React.FC = () => {
 
   return (
     <div className="container-custom py-6 max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-6 md:hidden">
         <button
           type="button"
           onClick={() => navigate(-1)}

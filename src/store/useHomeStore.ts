@@ -57,14 +57,10 @@ interface HomeStore {
   isLoadingBanners: boolean;
   astrologers: Astrologer[];
   isLoadingAstrologers: boolean;
-  searchHints: string[];
-  isSearching: boolean;
   searchResults: Astrologer[];
   isLoadingSearchResults: boolean;
   fetchBanners: () => Promise<void>;
   fetchAstrologers: () => Promise<void>;
-  fetchSearchHints: (query: string) => Promise<void>;
-  clearSearchHints: () => void;
   searchAstrologers: (query: string) => Promise<void>;
   clearSearchResults: () => void;
 }
@@ -74,8 +70,6 @@ export const useHomeStore = create<HomeStore>((set) => ({
   isLoadingBanners: false,
   astrologers: [],
   isLoadingAstrologers: false,
-  searchHints: [],
-  isSearching: false,
   searchResults: [],
   isLoadingSearchResults: false,
 
@@ -102,18 +96,6 @@ export const useHomeStore = create<HomeStore>((set) => ({
       isLoadingAstrologers: false,
     });
   },
-
-  fetchSearchHints: async (query: string) => {
-    if (query.trim().length < 3) {
-      set({ searchHints: [] });
-      return;
-    }
-    set({ isSearching: true });
-    const res = await getApi<string[]>(urlApi.dashboard.search, { query });
-    set({ searchHints: res.status === 'success' && res.data ? res.data : [], isSearching: false });
-  },
-
-  clearSearchHints: () => set({ searchHints: [] }),
 
   searchAstrologers: async (query: string) => {
     if (query.trim().length < 3) {
